@@ -10,6 +10,6 @@ It will:
 
 ## Usage
 ```bash
-sudo chmod +x add-nginx-proxy.sh
-sudo ./add-nginx-proxy.sh
+sudo chmod +x run.sh
+sudo ./run.sh
 ```
