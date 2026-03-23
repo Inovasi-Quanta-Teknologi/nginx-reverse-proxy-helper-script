@@ -47,6 +47,32 @@ nginx -t
 if [ $? -eq 0 ]; then
     systemctl reload nginx
     echo "Reverse proxy for $domain -> $backend_ip:$backend_port added and Nginx reloaded!"
+    
+    # Ask if user wants SSL certificate
+    read -p "Do you want to enable SSL with Let's Encrypt? (y/n): " enable_ssl
+    
+    if [[ "$enable_ssl" =~ ^[Yy]$ ]]; then
+        # Check if certbot is installed
+        if ! command -v certbot &> /dev/null; then
+            echo "Certbot is not installed. Install it first:"
+            echo "  Ubuntu/Debian: sudo apt install certbot python3-certbot-nginx"
+            echo "  CentOS/RHEL: sudo yum install certbot python3-certbot-nginx"
+            exit 1
+        fi
+        
+        read -p "Enter email for SSL certificate notifications: " email
+        
+        # Obtain and install SSL certificate
+        echo "Obtaining SSL certificate..."
+        certbot --nginx -d "$domain" -d "www.$domain" --non-interactive --agree-tos --email "$email" --redirect
+        
+        if [ $? -eq 0 ]; then
+            echo "SSL certificate successfully installed for $domain!"
+            echo "Your site is now accessible via HTTPS with automatic HTTP to HTTPS redirect."
+        else
+            echo "Failed to obtain SSL certificate. Please check certbot logs."
+        fi
+    fi
 else
     echo "Nginx config test failed. Check your config."
 fi
